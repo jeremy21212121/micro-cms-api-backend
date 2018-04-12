@@ -1,23 +1,38 @@
 const EventTang = require('../models/event.model.js');
 
+//helper functions
+const isInvalidEventTangObj = (req) => {
+
+  if ( req.body.length !== 1
+    || !req.body.description
+    || !req.body.name
+    || !req.body.start_time ) {
+      return true;
+  } else {
+    return false;
+  }
+}
+/////
+
 exports.create = (req,res) => {
 
-  if (typeof req.body !== "object" || !req.body.description || !req.body.name || !req.body.start_time) {
+  if (isInvalidEventTangObj(req)) {
     console.log("Can't create event, malformed EventTang object");
     return res.status(400).send({error: "Invalid event object"});
   }
 
   const singleEvent = new EventTang({
-    start_time: req.body.start_time || "blank",
-    name: req.body.name || "blank",
-    description: req.body.description || "blank"
+    start_time: req.body.start_time,
+    name: req.body.name,
+    description: req.body.description
   });
 
   singleEvent.save()
   .then(data => {
     res.send(data);
   }).catch(err => {
-    res.status(500).send({message: err.message || "some error creating event"});
+    console.log("Error saving event:" + err.message)
+    res.status(500).send({error: err.message || "some error saving event"});
   });
 
 };
@@ -29,7 +44,7 @@ exports.findAll = (req,res) => {
   .then(events => {
     res.send(events);
   }).catch(err => {
-    res.status(500).send({message: err.message || "some error retrieving event"});
+    res.status(500).send({error: err.message || "some error retrieving event"});
   });
 
 
@@ -37,36 +52,36 @@ exports.findAll = (req,res) => {
 
 
 exports.findOne = (req,res) => {
-  return res.status(500).send({message: "not yet implemented"});
+  return res.status(500).send({error: "not yet implemented"});
 };
 
 
 exports.update = (req,res) => {
 
-  if (!req.body.description) {
-    return res.status(400).send({message: "Event description can't be empty"});
+  if ( isInvalidEventTangObj(req) ) {
+    return res.status(400).send({error: "Invalid event object"});
   }
 
   EventTang.findByIdAndUpdate(req.params.eventId, {
-    start_time: req.body.start_time || "blank",
-    name: req.body.name || "blank",
-    description: req.body.description || "blank"
+    start_time: req.body.start_time,
+    name: req.body.name,
+    description: req.body.description
   }, {new: true})
   .then(singleEvent => {
     if (!singleEvent) {
       return res.status(404).send({
-        message: "Can't find ID: " + req.params.eventId
+        error: "Can't find ID: " + req.params.eventId
       });
     }
     res.send(singleEvent);
   }).catch(err => {
     if (err.kind === "ObjectId") {
       return res.status(404).send({
-        message: "Can't find ID: " + req.params.eventId
+        error: "Can't find ID: " + req.params.eventId
       });
     }
     return res.status(500).send({
-      message: "Error updating ID: " + req.params.eventId
+      error: "Error updating ID: " + req.params.eventId
     });
   });
 };
@@ -76,18 +91,18 @@ exports.delete = (req,res) => {
   .then(singleEvent => {
     if (!singleEvent) {
       return res.status(404).send({
-        message: "Can't find ID: " + req.params.eventId
+        error: "Can't find ID: " + req.params.eventId
       });
     }
     res.send({message: "deleted"});
   }).catch(err => {
     if (err.kind === "ObjectId" || err.name === "NotFound") {
       return res.status(404).send({
-        message: "Can't find ID: " + req.params.eventId
+        error: "Can't find ID: " + req.params.eventId
       });
     }
     return res.status(500).send({
-      message: "Can't delete ID: " + req.params.eventId
+      error: "Can't delete ID: " + req.params.eventId
     });
   });
 
