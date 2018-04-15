@@ -3,6 +3,20 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+const dbConfig = require("./config/db.config.js");
+const mongoose = require('mongoose');
+const passport = require('passport');
+
+mongoose.Promise = global.Promise;
+
+mongoose.connect(dbConfig.url)
+.then(() => {
+  console.log("Connected to DB");
+}).catch(err => {
+  console.log("Error connecting to DB, exiting");
+  process.exit();
+});
+
 // const preVerifyBuf = (buf) => {
 //   for (i=1;i<buf.length-1;i++) {
 //     if (buf[i] == 123 || buf[i] == 125) {
@@ -42,19 +56,8 @@ app.use(bodyParser.json({
 app.use(bodyParser.text());
 
 // app.use(bodyParser.raw());
+app.use(passport.initialize());
 
-const dbConfig = require("./config/db.config.js");
-const mongoose = require('mongoose');
-
-mongoose.Promise = global.Promise;
-
-mongoose.connect(dbConfig.url)
-.then(() => {
-  console.log("Connected to DB");
-}).catch(err => {
-  console.log("Error connecting to DB, exiting");
-  process.exit();
-});
 
 
 

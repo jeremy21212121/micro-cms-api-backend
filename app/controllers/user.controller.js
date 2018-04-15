@@ -33,8 +33,6 @@ exports.create = (req,res) => {
     console.log("error saving user: " + user.username + " - error msg: " + err.message);
     return res.status(500).send({error: err.message || "Error saving user"});
   });
-
-
 };
 
 
@@ -54,6 +52,14 @@ exports.findAll = (req,res) => {
     console.log("Error finding users: " + err.message);
     res.status(500).send({error: err.message || "some error finding users"});
   });
-
-
 };
+
+exports.findOne = (req,res) => {
+  User.findOne({username: req.params.username})
+  .then(singleUser => {
+    res.send(singleUser);
+  }).catch(err => {
+    console.log("Error finding user: " + err.message);
+    res.status(500).send({error: err.message || "some error finding user"});
+  });
+}

@@ -16,7 +16,7 @@ const userSchema = mongoose.Schema({
 });
 
 userSchema.pre('save', function(next) {
-  var user = this;
+  const user = this;
 
   if (!user.isModified('password')) {
     return next();
@@ -34,5 +34,12 @@ userSchema.pre('save', function(next) {
     });
   });
 });
+
+userSchema.methods.verifyPassword = function(password, callback) {
+  bcrypt.compare(password, this.password, (error,matches) => {
+    if (error) { return callback(error); }
+    callback(null,matches);
+  });
+};
 
 module.exports = mongoose.model('User', userSchema);
